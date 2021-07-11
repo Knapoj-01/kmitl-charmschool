@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 from django.core.validators import MaxValueValidator, MinValueValidator 
 from django.utils import timezone
+from gdstorage.storage import GoogleDriveStorage
+gd_storage = GoogleDriveStorage()
 
 gender_choices = [
     ('นาย', 'นาย'),
@@ -12,6 +14,9 @@ type_choices = [
     ('TA', 'นักศึกษาผู้ช่วยสอน')
 ]
 class Student(models.Model):
+    class Meta:
+        ordering = ['group_ref', 'student_id']
+        
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gender = models.CharField(max_length=6, choices=gender_choices)
     name = models.CharField(max_length=100)
@@ -51,7 +56,7 @@ class Course_Content(Content_Base):
         verbose_name = 'Course Content'
         verbose_name_plural = 'Course Contents'
 
-class Assignments(Content_Base):
+class Assignment(Content_Base):
     due_date = models.DateTimeField()
     max_score = models.IntegerField()
 
@@ -59,16 +64,16 @@ class Course_Comment(Content_Base):
     class Meta:
         verbose_name = 'Course Comment'
         verbose_name_plural = 'Course Comments'
-
-    content = models.ForeignKey(Course_Content, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Course_Content, on_delete=models.CASCADE)
 
 
 class Classwork(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    assignment = models.OneToOneField(Assignments, on_delete=models.CASCADE)
+    assignment = models.OneToOneField(Assignment, on_delete=models.CASCADE)
     submit_date = models.DateTimeField(default=timezone.now)
+    work = models.FileField(upload_to='classwork/{}'.format(str(assignment)), storage=gd_storage, null=True)
     score = models.IntegerField(null=True)
     graded = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.user)
+        return str(self.user) + str(self.assignment)
