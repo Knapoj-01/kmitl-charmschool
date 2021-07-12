@@ -14,7 +14,9 @@ from pathlib import Path
 
 import environ, os
 
-env = environ.Env()
+env = environ.Env(
+     SITE_ID=(int, 1)
+)
 environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,15 +44,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     #3rd Party App
     'rest_framework',
     'gdstorage',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     #Internal App
     'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -134,7 +142,23 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/build/static')]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Storages
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = None
 GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE_CONTENTS = env('GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE_CONTENTS')
 
+# Allauth
+SITE_ID = env('SITE_ID')
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
