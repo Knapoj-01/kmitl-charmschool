@@ -12,13 +12,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
-import environ
+import environ, os
 
 env = environ.Env()
 environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     #3rd Party App
     'rest_framework',
     'gdstorage',
+    'webpack_loader',
     #Internal App
     'api.apps.ApiConfig',
 ]
@@ -63,7 +65,7 @@ ROOT_URLCONF = 'CharmWeb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR,],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -133,3 +135,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Storages
 GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = None
 GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE_CONTENTS = env('GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE_CONTENTS')
+
+# Webpack Loader
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': DEBUG,
+        'BUNDLE_DIR_NAME': '/bundles/',  # must end with slash
+        'STATS_FILE': os.path.join(FRONTEND_DIR, 'webpack-stats.json'),
+    }
+}
